@@ -1,15 +1,19 @@
 package hello.core.scope;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Provider;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class SingletonWithPrototypeTest1 {
+public class SingletonWithPrototypeTest {
 
     @Test
     void prototypeFind() {
@@ -36,26 +40,34 @@ public class SingletonWithPrototypeTest1 {
 
         ClientBean clientBean2 = ac.getBean(ClientBean.class);
         int count2 = clientBean2.logic();
-        assertThat(count2).isEqualTo(2);
+        assertThat(count2).isEqualTo(1);
         ac.close();
     }
 
+    @Component
     @Scope("singleton")
     static class ClientBean {
 
-        private final PrototypeBean prototypeBean;
+        // ObjectFactory: 기능이 단순하고 별도의 라이브러리 필요 없음, 스프링에 의존
+        // ObjectProvider: ObjectFactory의 상속, 옵션, 스트림 처리 등의 편의 기능이 많고,
+        // 별도의 라이브러리 필요 없음, 스프링에 의존.
 
-        public ClientBean(PrototypeBean prototypeBean) {
-            this.prototypeBean = prototypeBean;
+
+        @Autowired
+        private final Provider<PrototypeBean> prototypeBeanProvider;
+
+        public ClientBean(Provider<PrototypeBean> prototypeBeanProvider) {
+            this.prototypeBeanProvider = prototypeBeanProvider;
         }
 
         public int logic() {
+            PrototypeBean prototypeBean = prototypeBeanProvider.get();
             prototypeBean.addCount();
             return prototypeBean.getCount();
         }
     }
 
-
+    @Component
     @Scope("prototype")
     static class PrototypeBean {
 

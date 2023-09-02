@@ -36,7 +36,7 @@ public class SingletonWithPrototypeTest {
         AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext(ClientBean.class, PrototypeBean.class);
         ClientBean clientBean1 = ac.getBean(ClientBean.class);
         int count1 = clientBean1.logic();
-        assertThat(count1).isEqualTo(1);
+        assertThat(count1).isEqualTo(1);?
 
         ClientBean clientBean2 = ac.getBean(ClientBean.class);
         int count2 = clientBean2.logic();
